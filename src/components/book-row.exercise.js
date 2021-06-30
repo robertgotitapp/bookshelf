@@ -16,7 +16,7 @@ function BookRow({user, book}) {
     queryKey: 'list-items',
     queryFn: () => client('list-items', {
       token: user.token
-    })
+    }).then(data => data.listItems)
   })
 
   const listItem = listItems?.find(item => item.bookId === book.id) ?? null
