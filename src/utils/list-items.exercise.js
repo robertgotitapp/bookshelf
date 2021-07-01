@@ -1,5 +1,5 @@
-import {client} from 'utils/api-client'
 import {useQuery, useMutation, queryCache} from 'react-query'
+import {client} from 'utils/api-client'
 
 export const useListItems = (user) => {
   const {data: listItems} = useQuery({
@@ -12,12 +12,12 @@ export const useListItems = (user) => {
 
 export const useListItem = (user, bookId) => {
   const listItems = useListItems(user)
-  return listItems?.find(item => item.bookId === bookId) ?? null
+  return listItems.find(item => item.bookId === bookId) ?? null
 }
 
-const defaultOnSettled = () => ({
+const defaultOnSettled = {
   onSettled: () => queryCache.invalidateQueries('list-items')
-})
+}
 
 export const useUpdateListItem = (user) => useMutation((updates) => client(`list-items/${updates.id}`, {
   data: updates,
@@ -30,7 +30,7 @@ export const useRemoveListItem = (user) => useMutation(({id}) => client(`list-it
   token: user.token,
 }), defaultOnSettled)
 
-export const useCreateListItem = (user) => useMutation((bookId) => client('list-items', {
+export const useCreateListItem = (user) => useMutation(({bookId}) => client('list-items', {
   data : { bookId },
   token: user.token,
 }), defaultOnSettled)

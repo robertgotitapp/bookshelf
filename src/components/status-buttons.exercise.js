@@ -10,10 +10,15 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
-import {useAsync} from 'utils/hooks'
+import {
+  useListItem,
+  useUpdateListItem,
+  useRemoveListItem,
+  useCreateListItem,
+} from 'utils/list-items'
 import * as colors from 'styles/colors'
+import {useAsync} from 'utils/hooks'
 import {CircleButton, Spinner} from './lib'
-import { useListItem, useUpdateListItem, useRemoveListItem, useCreateListItem} from 'utils/list-items'
 
 function TooltipButton({label, highlight, onClick, icon, ...rest}) {
   const {isLoading, isError, error, run} = useAsync()
@@ -48,6 +53,7 @@ function TooltipButton({label, highlight, onClick, icon, ...rest}) {
 
 function StatusButtons({user, book}) {
   const listItem = useListItem(user, book.id)
+
   const [update] = useUpdateListItem(user)
   const [remove] = useRemoveListItem(user)
   const [create] = useCreateListItem(user)
@@ -59,20 +65,14 @@ function StatusButtons({user, book}) {
           <TooltipButton
             label="Unmark as read"
             highlight={colors.yellow}
-            onClick={() => update({
-              id: listItem.id, 
-              finishDate: null
-            })}
+            onClick={() => update({id: listItem.id, finishDate: null})}
             icon={<FaBook />}
           />
         ) : (
           <TooltipButton
             label="Mark as read"
             highlight={colors.green}
-            onClick={() => update({
-              id: listItem.id,
-              finishDate: Date.now()
-            })}
+            onClick={() => update({id: listItem.id, finishDate: Date.now()})}
             icon={<FaCheckCircle />}
           />
         )
@@ -88,7 +88,7 @@ function StatusButtons({user, book}) {
         <TooltipButton
           label="Add to list"
           highlight={colors.indigo}
-          onClick={() => create(book.id)}
+          onClick={() => create({bookId: book.id})}
           icon={<FaPlusCircle />}
         />
       )}
