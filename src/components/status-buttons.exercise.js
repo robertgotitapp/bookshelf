@@ -10,11 +10,10 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
-import { useQuery, useMutation, queryCache} from 'react-query'
-import { client } from 'utils/api-client'
 import {useAsync} from 'utils/hooks'
 import * as colors from 'styles/colors'
 import {CircleButton, Spinner} from './lib'
+import { useListItem, useUpdateListItem, useRemoveListItem, useCreateListItem} from 'utils/list-items'
 
 function TooltipButton({label, highlight, onClick, icon, ...rest}) {
   const {isLoading, isError, error, run} = useAsync()
@@ -48,33 +47,10 @@ function TooltipButton({label, highlight, onClick, icon, ...rest}) {
 }
 
 function StatusButtons({user, book}) {
-  const { data: listItems } = useQuery({
-    queryKey: 'list-items', 
-    queryFn: () => client('list-items', {token: user.token}).then(data => data.listItems)})
-
-  const listItem = listItems?.find(item => item.bookId === book.id) ?? null
-  
-  const [update] = useMutation((updates) => client(`list-item/${updates.id}`, {
-    data: updates,
-    method: 'PUT',
-    token: user.token,
-  }), {
-    onSettled: () => queryCache.invalidateQueries('list-items')
-  })
-
-  const [remove] = useMutation(({id}) => client(`list-items/${id}`, {
-    method: 'DELETE',
-    token: user.token,
-  }), {
-    onSettled: () => queryCache.invalidateQueries('list-items')
-  })
-
-  const [create] = useMutation((bookId) => client('list-items', {
-    data : { bookId },
-    token: user.token,
-  }), {
-    onSettled: () => queryCache.invalidateQueries('list-items')
-  })
+  const listItem = useListItem(user, book.id)
+  const [update] = useUpdateListItem(user)
+  const [remove] = useRemoveListItem(user)
+  const [create] = useCreateListItem(user)
 
   return (
     <React.Fragment>
@@ -93,12 +69,10 @@ function StatusButtons({user, book}) {
           <TooltipButton
             label="Mark as read"
             highlight={colors.green}
-            onClick={() => {
-              update({
-                id: listItem.id,
-                finishDate: Date.now()
-              })
-            }}
+            onClick={() => update({
+              id: listItem.id,
+              finishDate: Date.now()
+            })}
             icon={<FaCheckCircle />}
           />
         )
